@@ -25,8 +25,7 @@ def import_csv_files():
     for csv_file in csv_files:
         filename = os.path.basename(csv_file)
 
-#Check header is valid before importing, built to handle (remove) header-less files that were causing issues earlier in
-#the project.
+#Check header is valid before importing, built to handle (remove) header-less files that were causing issues earlier in the project.
         with open(csv_file, 'r') as f:
             first_line = f.readline().strip()
         headers = set(first_line.split(','))
