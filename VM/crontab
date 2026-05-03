@@ -1,0 +1,5 @@
+#Check every minute for new CSV file and then import it into database
+* * * * * python3 /home/harry/sensor-data/import_csv.py >> /home/harry/sensor-data/import.log 2>&1
+
+#Retrain the LSTM model on 'minute 0' of every hour.
+0 * * * * python3 /home/harry/sensor-data/forecast.py >> /var/lib/sensor-data/forecast_cron.log 2>&1
