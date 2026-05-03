@@ -20,7 +20,7 @@ DISPLAY_CYCLE = 3
 #Open communication channel (the I2C communication bus).
 bus = SMBus(1)
 
-#Connects to BME280 sensor over the bus and allows it to wake for half a second before forcing it to #continuously take readings.
+#Connects to BME280 sensor over the bus and allows it to wake for half a second before forcing it to continuously take readings.
 bme280 = BME280(i2c_dev=bus)
 time.sleep(0.5)
 bme280.setup(mode="forced")
@@ -51,9 +51,8 @@ except IOError:
 
 
 #Sensors on Enviro+ hat measure resistance to the pollutants rather than their concentration.
-#Conversion calculations performed as the resistance to a pollutant is logarithmically proportional to its #concentration.
-#Error handling - if sensor reads a 0 or negative value, can happen during warm up, then no reading returned
-#so as to avoid crashing.
+#Conversion calculations performed as the resistance to a pollutant is logarithmically proportional to its concentration.
+#Error handling - if sensor reads a 0 or negative value, can happen during warm up, then no reading returned so as to avoid crashing.
 def ohms_to_ppm_co(ohms):
     try:
         return round(math.pow(10, (math.log10(ohms / 750000) / -0.75)), 2)
@@ -83,8 +82,7 @@ def init_csv():
         ])
 
 
-#Appends a single new row to the CSV file under the correct headers of all the relevant readings as well as
-#the new calculated concentrations.
+#Appends a single new row to the CSV file under the correct headers of all the relevant readings as well as the new calculated concentrations.
 def log_to_csv(data):
     with open(LOG_FILE, "a", newline="") as f:
         writer = csv.writer(f)
@@ -124,7 +122,7 @@ def draw_screen(screen, data):
         draw.text((4, 40), f"NO2:  {data.get('no2_ppm', '--')} ppm", font=font_small, fill=(255, 220, 120))
         draw.text((4, 56), f"NH3:  {data.get('nh3_ppm', '--')} ppm", font=font_small, fill=(180, 255, 220))
 
-#Cuurent time always displayed across both screens.
+#Current time always displayed across both screens.
     ts = datetime.now().strftime("%H:%M:%S")
     draw.text((4, HEIGHT - 14), ts, font=font_small, fill=(80, 80, 100))
     disp.display(img)
@@ -134,8 +132,7 @@ def read_sensors():
     data = {}
 
 
-#Error handling - Each sensor is read separately so in the event of  failure, the subsequent sensor readings
-#are not affected.
+#Error handling - Each sensor is read separately so in the event of  failure, the subsequent sensor readings are not affected.
 #Temperature offset is implemented to counteract the heat generated from the Pi itself.
     try:
         data["temperature"] = round(bme280.get_temperature() - TEMP_OFFSET, 1)
@@ -217,7 +214,7 @@ def main():
         img = Image.new("RGB", (WIDTH, HEIGHT), (0, 0, 0))
         disp.display(img)
 
-#Only runs if this script is called directly. Importation from another script wouldn't commence sensor #readings.
+#Only runs if this script is called directly. Importation from another script wouldn't commence sensor readings.
 if __name__ == "__main__":
     main()
 
