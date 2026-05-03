@@ -68,8 +68,7 @@ def setup_predictions_db():
         )
     ''')
 
-#Table contains timestamp of script execution, number of readings, number of outliers,
-#number of remaining data values, number of sequences, total lost, confidence & mean of prediction as well #as the predicted value.
+#Table contains timestamp of script execution, number of readings, number of outliers, number of remaining data values, number of sequences, total lost, confidence & mean of prediction as well as the predicted value.
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS forecast_runs (
             id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -86,7 +85,7 @@ def setup_predictions_db():
         )
     ''')
 
-#Table contains all readings that have been removed as outliers, the timestamp, how far removed from mean #of the data set.
+#Table contains all readings that have been removed as outliers, the timestamp, how far removed from mean of the data set.
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS outliers_log (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
