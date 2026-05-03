@@ -3,4 +3,4 @@
 
 
 
-SOURCE
+OpenAI (2026) System architecture diagram of Enviro+ monitoring pipeline. AI-generated image. Generated using DALL·E via ChatGPT.
