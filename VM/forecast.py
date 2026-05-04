@@ -13,8 +13,6 @@ import logging
 import os
 warnings.filterwarnings('ignore')
 
-
-
 SENSORS_DB     = '/var/lib/sensor-data/sensors.db'
 PREDICTIONS_DB = '/var/lib/sensor-data/predictions.db'
 LOG_FILE       = '/var/lib/sensor-data/forecast.log'
@@ -24,7 +22,6 @@ SEQ_LEN        = 360
 Z_THRESHOLD    = 3.0
 EPOCHS         = 50
 BATCH_SIZE     = 32
-
 
 #Method for setting up the logging of data in forecast log as well as outputting to terminal.
 logging.basicConfig(
@@ -38,9 +35,6 @@ def log(msg):
     print(msg)
     logging.info(msg)
 
-
-
-
 #Constructs message that is outputted to terminal and log file after each EPOCH is complete.
 #Message contains basic loss information of each EPOCH respectively.
 class LoggingCallback(Callback):
@@ -48,16 +42,12 @@ class LoggingCallback(Callback):
         msg = f"Epoch {epoch + 1}/{self.params['epochs']} - loss: {logs['loss']:.6f} - val_loss: {logs.get('val_loss', 0):.6f}"
         log(msg)
 
-
-
 #Constructs predictions database with three tables.
 #Checks if tables are pre-existing.
 def setup_predictions_db():
     conn = sqlite3.connect(PREDICTIONS_DB)
     cursor = conn.cursor()
     cursor.execute('''
-
-#Table contains timestamp of generation, timestamp of prediction, predicted value, confidence boundaries.
         CREATE TABLE IF NOT EXISTS co_forecast (
             id               INTEGER PRIMARY KEY AUTOINCREMENT,
             generated_at     TEXT NOT NULL,
@@ -67,8 +57,6 @@ def setup_predictions_db():
             upper_bound      REAL
         )
     ''')
-
-#Table contains timestamp of script execution, number of readings, number of outliers, number of remaining data values, number of sequences, total lost, confidence & mean of prediction as well as the predicted value.
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS forecast_runs (
             id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,8 +72,6 @@ def setup_predictions_db():
             next_predicted      REAL
         )
     ''')
-
-#Table contains all readings that have been removed as outliers, the timestamp, how far removed from mean of the data set.
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS outliers_log (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -97,8 +83,6 @@ def setup_predictions_db():
     ''')
     conn.commit()
     conn.close()
-
-
 
 #Data retrieval from sensor readings database.
 #Only retrieves records where CO data is present in chronological order of timestamp value.
@@ -120,8 +104,6 @@ def load_data():
 
 #Passes processed data back for further processing such as outlier removal & ML.
     return df
-
-
 
 #Outlier removal
 #Calculates a Z-Score of every CO reading in the dataset (it's standard deviation from mean).
@@ -157,21 +139,18 @@ def remove_outliers(df, run_at):
         conn.commit()
         conn.close()
 
-#Returns the remaining data for ML 
+#Returns the remaining data for ML
     return df_clean.reset_index(drop=True)
 
-
 #Creates look back pairs for LSTM model of every single element in dataset
-#One side of pair = previous 360 readings (1 hour of recorded data.
-#Other side of pair is the net immediate recorded value after the hour of data.
+#One side of pair = previous 360 readings (1 hour of recorded data).
+#Other side of pair is the next immediate recorded value after the hour of data.
 def prepare_sequences(values, seq_len):
     X, y = [], []
     for i in range(len(values) - seq_len):
         X.append(values[i:i + seq_len])
         y.append(values[i + seq_len])
     return np.array(X), np.array(y)
-
-
 
 #Construction of neural network.
 #Receives 360 data values for processing by 64 units.
@@ -193,8 +172,6 @@ def build_model(seq_len):
     model.compile(optimizer='adam', loss='mse')
     return model
 
-
-
 #LSTM model in use.
 #Volume of predictions calculated: 6 hours / 10 seconds (each reading) = 2160 individual predictions required.
 def generate_forecast(model, last_sequence, scaler, last_timestamp):
@@ -203,7 +180,7 @@ def generate_forecast(model, last_sequence, scaler, last_timestamp):
     current_seq = last_sequence.copy()
 
 #Begins with previous 360 'real' values to predict the next one.
-#Then uses its on predicted values over 'real' recordings.
+#Then uses its own predicted values over 'real' recordings.
     for _ in range(steps):
         pred = model.predict(current_seq.reshape(1, SEQ_LEN, 1), verbose=0)
         predictions.append(pred[0][0])
@@ -224,8 +201,6 @@ def generate_forecast(model, last_sequence, scaler, last_timestamp):
     ]
 
     return forecast_times, predictions_actual, lower, upper
-
-
 
 #Prediction saving
 def save_predictions(forecast_times, predictions, lower, upper, run_at,
@@ -278,8 +253,6 @@ def save_predictions(forecast_times, predictions, lower, upper, run_at,
     conn.commit()
     conn.close()
     log(f"Saved {len(rows)} forecast points to predictions database.")
-
-
 
 #Main for subsequent method calling.
 #Logs precise time that forecasting began.
