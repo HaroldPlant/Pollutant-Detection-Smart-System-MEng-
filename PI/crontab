@@ -1,0 +1,2 @@
+#Activates transfer of sensor readings every 5 minutes
+*/5 * * * * /bin/bash /home/pi/transfer.sh >> /home/pi/transfer.log 2>&1
